@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 import socketio
 import asyncio
 import os
@@ -8,16 +9,30 @@ import os
 # Initialize FastAPI app
 app = FastAPI()
 
-# Serve static files from the 'frontend' directory (one level up)
-app.mount("/static", StaticFiles(directory="../frontend"), name="static")
+# Configure CORS
+origins = [
+    "https://your-frontend-name.onrender.com",  # Replace with your frontend's Render URL
+    # You can add more frontend URLs if needed
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Initialize SocketIO server
-sio = socketio.AsyncServer(async_mode='asgi')
+sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*') # Enable CORS for SocketIO as well
 socketio_app = socketio.ASGIApp(sio, app)
 
-@app.get("/")
-async def get():
-    return HTMLResponse(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "index.html")).read())
+# Remove serving static files and HTML endpoint for separate deployment
+# app.mount("/static", StaticFiles(directory="../frontend"), name="static")
+
+# @app.get("/")
+# async def get():
+#     return HTMLResponse(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "index.html")).read())
 
 @sio.on('connect')
 async def connect(sid, environ):

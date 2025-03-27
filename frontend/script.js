@@ -1,68 +1,52 @@
-var chatboxContent = document.getElementById('chatboxContent');
+var chatbox = document.getElementById('chatbox');
+var chatboxContent = chatbox.querySelector('div'); // The inner div where messages are added
 var userInput = document.getElementById('userInput');
-var socket = io('https://chatbot-backend-mxgn.onrender.com'); // Added the backend URL here
+var socket = io('https://chatbot-backend-mxgn.onrender.com/ws');
 
-// Handle connection
 socket.on('connect', function() {
-    console.log('Connected to server');
+    console.log('Connected to server');
 });
 
 socket.on('disconnect', function() {
-    console.log('Disconnected from server');
+    console.log('Disconnected from server');
 });
 
-// Listen for messages from the server
 socket.on('message', function(data) {
-    var message = document.createElement('p');
-    message.textContent = data;
-    message.classList.add('bot-message');
-    chatboxContent.appendChild(message);
-
-    scrollToBottom();
+    var message = document.createElement('p');
+    message.textContent = data;
+    message.classList.add('bot-message'); // Add class for bot messages
+    chatboxContent.appendChild(message); // Append to the inner div
+    // Scrolling will be handled by the MutationObserver
 });
 
-// Send user message to server
 function sendMessage(message) {
-    if (message.trim() === "") return; // Prevent empty messages
-
-    socket.emit('user_message', message);
-
-    var userMessage = document.createElement('p');
-    userMessage.textContent = 'You: ' + message;
-    userMessage.classList.add('user-message');
-    chatboxContent.appendChild(userMessage);
-
-    userInput.value = ""; // Clear input field
-
-    scrollToBottom();
+    socket.emit('user_message', message);
+    var userMessage = document.createElement('p');
+    userMessage.textContent = 'You: ' + message;
+    userMessage.classList.add('user-message'); // Add class for user messages
+    chatboxContent.appendChild(userMessage); // Append to the inner div
+    userInput.value = ""; // Clear input after sending
+    // Scrolling will be handled by the MutationObserver
 }
 
-// Handle Enter key press
 function handleKeyPress(event) {
-    if (event.key === "Enter") {
-        sendMessage(userInput.value);
-    }
+    if (event.key === "Enter") {
+        sendMessage(userInput.value);
+    }
 }
 
-// Handle send button click
 function sendMessageFromButton() {
-    sendMessage(userInput.value);
+    sendMessage(userInput.value);
 }
 
-// Function to scroll to the latest message smoothly
-function scrollToBottom() {
-    setTimeout(() => {
-        chatboxContent.lastChild?.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, 100);
-}
-
-// Observe new messages and ensure auto-scrolling
+// MutationObserver to automatically scroll to the bottom when new messages are added
 const observer = new MutationObserver(function(mutationsList) {
-    for (const mutation of mutationsList) {
-        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-            scrollToBottom();
-        }
-    }
+    for (const mutation of mutationsList) {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+    }
 });
 
-observer.observe(chatboxContent, { childList: true });
+// Start observing the chatbox for added nodes
+observer.observe(chatbox, { childList: true, subtree: true }); // Observe chatbox directly and its subtree

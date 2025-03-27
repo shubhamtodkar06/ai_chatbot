@@ -1,7 +1,7 @@
 var chatbox = document.getElementById('chatbox');
 var chatboxContent = chatbox.querySelector('div'); // The inner div where messages are added
 var userInput = document.getElementById('userInput');
-var socket = io('https://chatbot-backend-mxgn.onrender.com/ws');
+var socket = io('https://backend-oh7o.onrender.com');
 
 socket.on('connect', function() {
     console.log('Connected to server');

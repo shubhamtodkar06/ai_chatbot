@@ -11,7 +11,7 @@ app = FastAPI()
 
 # Configure CORS
 origins = [
-    "https://your-frontend-name.onrender.com",  # Replace with your frontend's Render URL
+    "https://chatbot-frontend-5c02.onrender.com",
     # You can add more frontend URLs if needed
 ]
 

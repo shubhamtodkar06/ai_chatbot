@@ -9,7 +9,7 @@ import os
 app = FastAPI()
 
 # Serve static files from the 'frontend' directory (one level up)
-app.mount("/static", StaticFiles(directory="../frontend"), name="static")
+app.mount("/static", StaticFiles(directory="./frontend"), name="static")
 
 # Initialize SocketIO server
 sio = socketio.AsyncServer(async_mode='asgi')
